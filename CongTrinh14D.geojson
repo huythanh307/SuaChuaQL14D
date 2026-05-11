@@ -13,7 +13,7 @@
       },
       "properties": {
         "name": "Km 1+550",
-        "description": "Speed: 2,01 km/h\nCourse: 133°\nElevation: 25 m\nAccuracy: 2 m",
+        "description": "Đã thi công xong khuôn đường và hoàn thành cấp phối 18cm",
         "visited": "1",
         "timestamp": "2026-04-24T02:31:54Z",
         "visible": true,
@@ -32,7 +32,7 @@
       },
       "properties": {
         "name": "Km 2+772",
-        "description": "Speed: 1,58 km/h\nCourse: 115°\nElevation: 36 m\nAccuracy: 2 m",
+        "description": "Đã thi công xong khuôn đường",
         "visited": "1",
         "timestamp": "2026-04-24T02:39:38Z",
         "visible": true,
@@ -51,7 +51,7 @@
       },
       "properties": {
         "name": "Km 3+700",
-        "description": "Speed: 0,04 km/h\nCourse: 309°\nElevation: 37 m\nAccuracy: 2 m",
+        "description": "Đã thi công xong khuôn đường",
         "visited": "1",
         "timestamp": "2026-04-24T02:46:01.965Z",
         "visible": true,
@@ -70,7 +70,7 @@
       },
       "properties": {
         "name": "Km 5",
-        "description": "Speed: 13,66 km/h\nCourse: 283°\nElevation: 25 m\nAccuracy: 13 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T02:48:51.268Z",
         "visible": true,
@@ -89,7 +89,7 @@
       },
       "properties": {
         "name": "Km6+030",
-        "description": "Speed: 14,97 km/h\nCourse: 270°\nElevation: 35 m\nAccuracy: 11 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T02:51:47.542Z",
         "visible": true,
@@ -108,7 +108,7 @@
       },
       "properties": {
         "name": "Km7+400",
-        "description": "Speed: 0,84 km/h\nCourse: 208°\nElevation: 64 m\nAccuracy: 2 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T02:58:07.500Z",
         "visible": true,
@@ -127,7 +127,7 @@
       },
       "properties": {
         "name": "km 7+700",
-        "description": "Speed: 2,69 km/h\nCourse: 247°\nElevation: 63 m\nAccuracy: 9 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T03:00:52.890Z",
         "visible": true,
@@ -146,7 +146,7 @@
       },
       "properties": {
         "name": "Km15+650",
-        "description": "Speed: 0,13 km/h\nCourse: 293°\nElevation: 373 m\nAccuracy: 3 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T03:37:20.899Z",
         "visible": true,
@@ -165,7 +165,7 @@
       },
       "properties": {
         "name": "km25+300",
-        "description": "Speed: 2,23 km/h\nCourse: 130°\nElevation: 245 m\nAccuracy: 2 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T04:04:20Z",
         "visible": true,
@@ -184,7 +184,7 @@
       },
       "properties": {
         "name": "km 28+300",
-        "description": "Speed: 1,51 km/h\nCourse: 93°\nElevation: 255 m\nAccuracy: 5 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T04:26:09.464Z",
         "visible": true,
@@ -203,7 +203,7 @@
       },
       "properties": {
         "name": "Km39+900",
-        "description": "Speed: 4,9 km/h\nCourse: 303°\nElevation: 324 m\nAccuracy: 5 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T05:05:21Z",
         "visible": true,
@@ -222,7 +222,7 @@
       },
       "properties": {
         "name": "Km 40+277 (cầu)",
-        "description": "Speed: 0,17 km/h\nCourse: 297°\nElevation: 317 m\nAccuracy: 2 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T05:09:47Z",
         "visible": true,
@@ -241,7 +241,7 @@
       },
       "properties": {
         "name": "Km 46+700",
-        "description": "Speed: 0,86 km/h\nCourse: 149°\nElevation: 406 m\nAccuracy: 3 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T07:11:26.879Z",
         "visible": true,
@@ -260,7 +260,7 @@
       },
       "properties": {
         "name": "Km 46+900",
-        "description": "Speed: 0,24 km/h\nCourse: 67°\nElevation: 418 m\nAccuracy: 2 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T07:09:17Z",
         "visible": true,
@@ -279,7 +279,7 @@
       },
       "properties": {
         "name": "km47+368",
-        "description": "Speed: 0,3 km/h\nCourse: 313°\nElevation: 423 m\nAccuracy: 2 m",
+        "description": "Đang chuẩn bị thi công",
         "visited": "1",
         "timestamp": "2026-04-24T05:34:01.500Z",
         "visible": true,

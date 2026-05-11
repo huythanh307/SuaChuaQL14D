@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bản đồ Đà Nẵng</title>
+    <title>Bản đồ Sửa chữa đột xuất đường Quốc lộ 14D</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -56,7 +56,7 @@
         /* Tiêu đề popup cho vùng */
         .info-popup h3 {
             color: #0026FF;
-            font-size: 16px;
+            font-size: 14px;
             border-bottom: 4px solid #f84803;
             text-align: center;
         }
@@ -117,6 +117,90 @@
             border-bottom: 8px solid white;
             width: 0;
             height: 0;
+        }
+
+        /* Popup wrapper scaling: scale the entire popup box including border and arrow */
+        .leaflet-popup-content-wrapper.congtrinh-popup-wrapper {
+            transition: transform 0.12s ease;
+            transform-origin: center top;
+            --popup-scale: 1;
+            transform: scale(var(--popup-scale));
+        }
+
+        /* Popup scaling: adjust both transform AND content sizes so text/images scale */
+        .congtrinh-popup {
+            transition: font-size 0.12s ease;
+            font-size: 1rem;
+        }
+        /* Base image rules to override inline sizes */
+        .congtrinh-popup img,
+        .congtrinh-popup-img {
+            max-width: 160px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+        }
+        .congtrinh-popup table { font-size: inherit; }
+        .congtrinh-popup p { font-size: 0.8em; }
+
+        /* Extra Small: zoom <= 10 */
+        .congtrinh-popup.extra-small {
+            font-size: 0.5rem;
+        }
+        .leaflet-popup-content-wrapper.congtrinh-popup-wrapper.extra-small {
+            --popup-scale: 0.5;
+        }
+        .congtrinh-popup.extra-small .congtrinh-popup-img {
+            max-width: calc(160px * 0.5);
+            max-height: calc(120px * 0.5);
+        }
+
+        /* Small: zoom 10-12 */
+        .congtrinh-popup.small {
+            font-size: 0.75rem;
+        }
+        .leaflet-popup-content-wrapper.congtrinh-popup-wrapper.small {
+            --popup-scale: 0.75;
+        }
+        .congtrinh-popup.small .congtrinh-popup-img {
+            max-width: calc(160px * 0.75);
+            max-height: calc(120px * 0.75);
+        }
+
+        /* Medium: zoom 12-14 */
+        .congtrinh-popup.medium {
+            font-size: 1rem;
+        }
+        .leaflet-popup-content-wrapper.congtrinh-popup-wrapper.medium {
+            --popup-scale: 1.0;
+        }
+        .congtrinh-popup.medium .congtrinh-popup-img {
+            max-width: 160px;
+            max-height: 120px;
+        }
+
+        /* Large: zoom 14-16 */
+        .congtrinh-popup.large {
+            font-size: 1.25rem;
+        }
+        .leaflet-popup-content-wrapper.congtrinh-popup-wrapper.large {
+            --popup-scale: 1.25;
+        }
+        .congtrinh-popup.large .congtrinh-popup-img {
+            max-width: calc(160px * 1.25);
+            max-height: calc(120px * 1.25);
+        }
+
+        /* Extra Large: zoom >= 16 */
+        .congtrinh-popup.extra-large {
+            font-size: 1.5rem;
+        }
+        .leaflet-popup-content-wrapper.congtrinh-popup-wrapper.extra-large {
+            --popup-scale: 1.5;
+        }
+        .congtrinh-popup.extra-large .congtrinh-popup-img {
+            max-width: calc(160px * 1.5);
+            max-height: calc(120px * 1.5);
         }
     </style>
 </head>
@@ -214,10 +298,10 @@
                 rows.push(`<tr><td>${label}</td><td style="text-align:right">${value}</td></tr>`);
             }
 
-            // Thêm hình ảnh riêng ngoài bảng nếu có
-            let imageHtml = '';
-            if (p.image) {
-                imageHtml = `<img src="${p.image}" alt="Hình ảnh" style="max-width:160px;max-height:120px;border:1px solid #ccc;cursor:pointer;margin-top:8px;" onclick="enlargeImage('${p.image}')">`;
+            // Thêm trường description nếu có
+            let descriptionHtml = '';
+            if (p.description) {
+                descriptionHtml = `<p style="margin:0 0 8px;white-space:pre-line;">${String(p.description).replace(/\n/g, '<br>')}</p>`;
             }
 
             // Xử lý trường image: nếu có nhiều ảnh cách nhau bằng dấu phẩy, chỉ hiển thị ảnh đầu tiên
@@ -225,13 +309,51 @@
             if (p.image && p.image.trim().length > 0) {
                 const images = p.image.split(',').map(img => img.trim()).filter(img => img.length > 0);
                 if (images.length > 0) {
-                    singleImageHtml = `<img src="${images[0]}" alt="Hình ảnh" style="max-width:160px;max-height:120px;border:1px solid #ccc;cursor:pointer;margin-top:8px;" onclick="enlargeImage('${p.image}')">`;
+                    singleImageHtml = `<img src="${images[0]}" alt="Hình ảnh" class="congtrinh-popup-img" style="border:1px solid #ccc;cursor:pointer;margin-top:8px;" onclick="enlargeImage('${p.image}')">`;
                 }
             }
 
-            return `<div class="info-popup congtrinh-popup"><h3>${p.name || 'Thông tin điểm'}</h3><table>${rows.join('')}</table>${singleImageHtml}</div>`;
+            return `<div class="info-popup congtrinh-popup"><h3>${p.name || 'Thông tin điểm'}</h3>${descriptionHtml}<table>${rows.join('')}</table>${singleImageHtml}</div>`;
         }
 
+        // Cập nhật kích thước popup dựa trên mức zoom của bản đồ
+        function updateCongTrinhPopupSizes() {
+            try {
+                const z = map.getZoom();
+                // Xác định class dựa trên zoom level: extra-small, small, medium, large, extra-large
+                let cls = 'medium'; // mặc định
+                if (z <= 10) cls = 'extra-small';
+                else if (z <= 12) cls = 'small';
+                else if (z <= 14) cls = 'medium';
+                else if (z <= 16) cls = 'large';
+                else cls = 'extra-large';
+                
+                // Áp dụng class cho tất cả popup congtrinh và wrapper của chúng
+                document.querySelectorAll('.congtrinh-popup').forEach(el => {
+                    el.classList.remove('extra-small', 'small', 'medium', 'large', 'extra-large');
+                    el.classList.add(cls);
+                    // Cập nhật class cho wrapper cũng
+                    const wrapper = el.closest('.leaflet-popup-content-wrapper');
+                    if (wrapper) {
+                        wrapper.classList.remove('extra-small', 'small', 'medium', 'large', 'extra-large');
+                        wrapper.classList.add(cls);
+                    }
+                });
+            } catch (e) {
+                // map chưa khởi tạo hoặc không có popup trên DOM
+            }
+        }
+
+        // Khi popup được mở, cập nhật kích thước ngay lập tức theo zoom hiện tại
+        map.on && map.on('popupopen', function (e) {
+            // Delay ngắn để nội dung popup đã được mount vào DOM
+            setTimeout(updateCongTrinhPopupSizes, 10);
+        });
+
+        // Khi thay đổi zoom, cập nhật các popup đang mở
+        map.on && map.on('zoomend', function () {
+            updateCongTrinhPopupSizes();
+        });
 
         // HÀM XỬ LÝ SỰ KIỆN CHO MỖI ĐỐI TƯỢNG
         function onEachFeatureHandler(feature, layer) {
@@ -256,7 +378,7 @@
                         autoClose: false,
                         closeOnClick: true,
                         offset: popupOffset,
-                        className: isAbove ? 'popup-above' : 'popup-below' // Thêm class để xử lý CSS mũi tên
+                        className: (isAbove ? 'popup-above' : 'popup-below') + ' congtrinh-popup-wrapper' // Thêm class để xử lý CSS mũi tên và scaling
                     });
                 }
 
