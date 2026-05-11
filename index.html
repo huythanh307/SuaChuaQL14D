@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bản đồ Đà Nẵng</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* Trang chính: reset margin/padding và font mặc định */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        /* Khung bản đồ phủ toàn màn hình */
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* Nhóm các nút điều khiển */
+        .controls-container {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 250px;
+        }
+
+        /* Style cho bảng chọn tên đường */
+        .selector-box {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Select danh sách đường */
+        #road-select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* Nút thao tác (định vị + chia sẻ) */
+        .locate-button,
+        .share-button {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+            font-weight: bold;
+            border: none;
+            width: 100%;
+        }
+
+        .share-button {
+            background: #4CAF50;
+            color: white;
+        }
+
+        /* 1. Loại bỏ độ rộng tối thiểu mặc định của Leaflet */
+        .info-popup {
+            min-width: auto !important;
+            display: inline-block;
+        }
+
+
+        /* Tiêu đề popup cho vùng */
+        .info-popup h3 {
+            margin: 0 0 10px 0;
+            color: #0026FF;
+            border-bottom: 2px solid #FF6A00;
+        }
+
+        /* Popup đường ĐT */
+        .info-popup h4 {
+            margin: 0;
+            color: #0026FF;
+            white-space: nowrap;
+            /* Ép chữ không được xuống dòng */
+            border-bottom: none;
+            /* Xóa gạch chân vệt cam */
+        }
+
+        /* 3. QUAN TRỌNG: Thu nhỏ khoảng trắng của bong bóng Leaflet */
+        .leaflet-popup-content {
+            margin: 7px 15px !important;
+            /* Chỉnh lại khoảng cách từ chữ tới viền popup trắng */
+            width: auto !important;
+            /* Ép khung trắng co lại theo nội dung */
+        }
+
+        /* Bảng thuộc tính trong popup */
+        .info-popup table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Dòng thuộc tính */
+        .info-popup td {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 10px;
+        }
+
+        /* Cột nhãn */
+        .info-popup td:first-child {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .congtrinh-popup img {
+            border: 1px solid #ccc;
+        }
+
+        /* Tùy biến nút layer của Leaflet */
+        .leaflet-control-layers-toggle:after {
+            content: "Chọn loại bản đồ";
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+            padding-left: 30px;
+            line-height: 36px;
+            white-space: nowrap;
+        }
+
+        .leaflet-control-layers-toggle {
+            width: auto !important;
+            height: 36px !important;
+            padding: 0 10px;
+            background-position: 5px center !important;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Nhãn tên đường trên bản đồ */
+        .road-label {
+            background: none;
+            color: rgb(252, 2, 2);
+            padding: 2px 8px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            border: none;
+            text-align: center;
+            text-shadow: #eee 2px 2px 4px;
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .dt609-label {
+            background: none;
+            color: rgb(6, 2, 252);
+            padding: 0;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            border: none;
+            text-shadow: #eee 2px 2px 4px;
+            pointer-events: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Cụm điều khiển nằm góc phải dưới -->
+    <div class="controls-container">
+        <button class="locate-button" onclick="findMyState()">📍 Vị trí của tôi</button>
+        <button class="share-button" onclick="shareLocation()">🔗 Chia sẻ vị trí của tôi</button>
+    </div>
+
+    <!-- Modal phóng to ảnh -->
+    <div id="image-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;justify-content:center;align-items:center;">
+        <div style="position:relative;">
+            <img id="modal-img" style="max-width:90vw;max-height:90vh;border:2px solid white;">
+            <button onclick="closeImageModal()" style="position:absolute;top:10px;right:10px;background:red;color:white;border:none;padding:5px 10px;cursor:pointer;">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Bản đồ Leaflet -->
+    <div id="map"></div>
+
+    <script>
+        // Khởi tạo bản đồ
+        var map = L.map('map', { center: [16.0544, 108.2022], zoom: 11 });
+        // Vị trí hiện tại của người dùng
+        var currentUserPos = null;
+        // Lớp đường đang được tô nổi bật
+        var lastHighlightedLayer = null;
+        // Marker vị trí người dùng
+        var currentUserMarker = null;
+        // Bộ định thời cập nhật vị trí
+        var locationIntervalId = null;
+
+        // Các lớp nền Google
+        var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Hybrid'
+        }).addTo(map);
+
+        var googleRoadmap = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Roadmap'
+        });
+
+        var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Terrain'
+        });
+
+        // Bộ chuyển lớp nền
+        var baseMaps = { "Vệ tinh": googleHybrid, "Giao thông": googleRoadmap, "Địa hình": googleTerrain };
+        L.control.layers(baseMaps).addTo(map);
+
+        // Lớp dữ liệu GeoJSON
+        let geoJsonLayer;
+        let ql14dLayer;
+        let congTrinhLayer;
+        let hasZoomedToQL14D = false;
+
+        // Tạo pane cho marker CongTrinh để ở trên các lớp khác
+        map.createPane('congTrinhPane');
+        map.getPane('congTrinhPane').style.zIndex = 650;
+
+        function isCongTrinhFeature(feature) {
+            return feature && feature.geometry && feature.geometry.type === 'Point'
+                && feature.properties && feature.properties.timestamp && feature.properties.visited;
+        }
+
+        function createCongTrinhPopup(feature) {
+            const p = feature.properties || {};
+            const rows = [];
+            for (const key in p) {
+                if (!Object.prototype.hasOwnProperty.call(p, key)) continue;
+                if (key === '__congTrinhId' || key === '__idx' || key === 'description' || key === 'visible') continue; // Skip internal properties and unwanted fields
+                const label = key === 'name' ? 'Tên điểm'
+                    : key === 'visited' ? 'Visited'
+                    : key === 'timestamp' ? 'Thời gian'
+                    : key === 'image' ? 'Hình ảnh'
+                    : key;
+                let value = String(p[key]).replace(/\n/g, '<br>');
+                if (key === 'image' && p[key]) {
+                    value = `<img src="${p[key]}" alt="Hình ảnh" style="max-width:160px;max-height:120px;border:1px solid #ccc;cursor:pointer;" onclick="enlargeImage('${p[key]}')">`;
+                }
+                rows.push(`<tr><td>${label}</td><td style="text-align:right">${value}</td></tr>`);
+            }
+            return `<div class="info-popup congtrinh-popup"><h3>${p.name || 'Thông tin điểm'}</h3><table>${rows.join('')}</table></div>`;
+        }
+
+        // HÀM XỬ LÝ SỰ KIỆN CHO MỖI ĐỐI TƯỢNG
+        function onEachFeatureHandler(feature, layer) {
+            if (feature.properties) {
+                const p = feature.properties;
+                const labels = { "dan_so": "Dân số", "dtich_km2": "Diện tích (km²)", "matdo_km2": "Mật độ" };
+                const keysToHide = ['name', 'styleUrl', 'styleHash', 'description', 'stroke', 'fill', 'fill-opacity', 'stroke-opacity', 'stroke-width', 'Tên phường/xã', 'ten_xa', 'loai'];
+
+                let fullTitle = (p.loai ? p.loai + " " : "") + (p.ten_xa || p.name || "Thông tin");
+
+                // Nếu là điểm CongTrinh14D thì hiển thị bảng đầy đủ trong popup, bao gồm ô thêm ảnh
+                if (isCongTrinhFeature(feature)) {
+                    const idx = p.__idx || 0;
+                    layer.bindPopup(createCongTrinhPopup(feature), { 
+                        maxWidth: 360, 
+                        minWidth: 220, 
+                        autoClose: false, 
+                        offset: L.point(0, -25 * (idx % 5) - 10)  // Offset để tránh chồng popup
+                    });
+                }
+                // KIỂM TRA: Nếu là dữ liệu đường (DT.geojson)
+                else if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
+                    // Chỉ hiển thị tiêu đề tên đường, không tạo bảng thuộc tính
+                    layer.bindPopup(`<div class="info-popup"><h4>${fullTitle}</h4></div>`);
+                }
+                // Ngược lại nếu là dữ liệu vùng (map.geojson)
+                else {
+                    let rows = "";
+                    for (let key in p) {
+                        if (!keysToHide.includes(key)) {
+                            let displayLabel = labels[key] || key;
+                            rows += `<tr><td>${displayLabel}</td><td style="text-align:right">${p[key]}</td></tr>`;
+                        }
+                    }
+                    layer.bindPopup(`<div class="info-popup"><h3>${fullTitle}</h3><table>${rows}</table></div>`);
+                }
+            }
+
+            layer.on({
+                mouseover: function (e) {
+                    if (e.target !== lastHighlightedLayer) {
+                        e.target.setStyle({ weight: 7, color: '#FF0000' });
+                        e.target.bringToFront();
+                    }
+                },
+                mouseout: function (e) {
+                    if (e.target !== lastHighlightedLayer) {
+                        if (ql14dLayer && ql14dLayer.hasLayer(e.target)) {
+                            ql14dLayer.resetStyle(e.target);
+                        } else if (congTrinhLayer && congTrinhLayer.hasLayer(e.target)) {
+                            congTrinhLayer.resetStyle(e.target);
+                        } else {
+                            geoJsonLayer.resetStyle(e.target);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tải dữ liệu ranh giới
+        fetch('map.geojson')
+            .then(res => res.json())
+            .then(data => {
+                // Lớp vùng
+                geoJsonLayer = L.geoJSON(data, {
+                    style: function () { return { fillOpacity: 0.1, color: getRandomColor(), weight: 1 }; },
+                    onEachFeature: onEachFeatureHandler
+                }).addTo(map);
+            })
+            .then(() => {
+                return fetch('QL14D.geojson');
+            })
+            .then(res => res.json())
+            .then(data => {
+                ql14dLayer = L.geoJSON(data, {
+                    style: function () { return { color: '#FFD800', weight: 8, opacity: 1 }; },
+                    onEachFeature: onEachFeatureHandler
+                }).addTo(map);
+
+                ql14dLayer.eachLayer(function (layer) {
+                    if (!hasZoomedToQL14D && layer.getBounds) {
+                        map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+                        if (layer.getPopup) {
+                            layer.openPopup();
+                        }
+                        hasZoomedToQL14D = true;
+                    }
+                });
+            })
+            .then(() => fetch('CongTrinh14D.geojson'))
+            .then(res => res.json())
+            .then(data => {
+                if (data.features && Array.isArray(data.features)) {
+                    // Filter out features where visible is false
+                    data.features = data.features.filter(f => f.properties && f.properties.visible !== false);
+                    data.features.forEach((feature, idx) => {
+                        if (feature.properties) {
+                            feature.properties.__congTrinhId = 'ct-' + idx;
+                            feature.properties.__idx = idx;
+                        }
+                    });
+                }
+                congTrinhLayer = L.geoJSON(data, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, {
+                            radius: 8,
+                            color: '#FF5722',
+                            fillColor: '#FF8A50',
+                            fillOpacity: 0.9,
+                            weight: 3,
+                            interactive: true,
+                            pane: 'congTrinhPane'
+                        });
+                    },
+                    onEachFeature: onEachFeatureHandler
+                }).addTo(map);
+
+                congTrinhLayer.eachLayer(function (layer) {
+                    if (layer.getPopup) {
+                        layer.openPopup();
+                    }
+                });
+                // Cập nhật style popup ngay sau khi mở
+                updatePopupStyles();
+            });
+
+        function updatePopupStyles() {
+            const zoom = map.getZoom();
+            // Điều chỉnh font-size dựa trên zoom level (base zoom 11)
+            const baseFontSize = 10;
+            const fontSize = Math.max(8, Math.min(14, baseFontSize + (zoom - 11) * 0.5));
+            // Điều chỉnh kích thước ảnh
+            const imgSize = Math.max(80, Math.min(160, 120 + (zoom - 11) * 5));
+
+            document.querySelectorAll('.congtrinh-popup table td').forEach(td => {
+                td.style.fontSize = fontSize + 'px';
+            });
+            document.querySelectorAll('.congtrinh-popup img').forEach(img => {
+                img.style.maxWidth = imgSize + 'px';
+                img.style.maxHeight = (imgSize * 0.75) + 'px'; // Giữ tỷ lệ
+            });
+        }
+
+        // Lắng nghe sự kiện zoom để cập nhật style popup
+        map.on('zoomend', updatePopupStyles);
+
+        // Định vị người dùng và cập nhật định kỳ
+        function findMyState() {
+            navigator.geolocation.getCurrentPosition(function (p) {
+                const lat = p.coords.latitude, lng = p.coords.longitude;
+                currentUserPos = [lat, lng];
+
+                // Xóa marker cũ nếu có
+                if (currentUserMarker) {
+                    map.removeLayer(currentUserMarker);
+                }
+
+                // Tạo marker mới và chỉ zoom ở lần bấm đầu
+                currentUserMarker = L.marker(currentUserPos).addTo(map).bindPopup("<b>Bạn đang ở đây!</b>").openPopup();
+                map.setView(currentUserPos, 15);
+
+                // Bắt đầu cập nhật mỗi 5 giây sau lần bấm đầu tiên
+                if (!locationIntervalId) {
+                    locationIntervalId = setInterval(function () {
+                        navigator.geolocation.getCurrentPosition(function (p) {
+                            const lat = p.coords.latitude, lng = p.coords.longitude;
+                            currentUserPos = [lat, lng];
+
+                            // Xóa marker cũ
+                            if (currentUserMarker) {
+                                map.removeLayer(currentUserMarker);
+                            }
+
+                            // Tạo marker mới, không thay đổi zoom
+                            currentUserMarker = L.marker(currentUserPos).addTo(map).bindPopup("<b>Bạn đang ở đây!</b>");
+                        });
+                    }, 5000);
+                }
+            });
+        }
+
+        // Chia sẻ vị trí hiện tại
+        function shareLocation() {
+            if (!currentUserPos) {
+                alert("Vui lòng nhấn 'Vị trí của tôi' trước khi chia sẻ!");
+                return;
+            }
+            const url = `https://www.google.com/maps?q=${currentUserPos[0]},${currentUserPos[1]}`;
+            if (navigator.share) {
+                navigator.share({ title: 'Vị trí của tôi', text: 'Vị trí của tôi', url: url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("Link vị trí đã được copy vào bộ nhớ tạm!");
+            }
+        }
+
+        function enlargeImage(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('image-modal').style.display = 'flex';
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-modal').style.display = 'none';
+        }
+
+        // Tạo màu ngẫu nhiên cho vùng
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) { color += letters[Math.floor(Math.random() * 16)]; }
+            return color;
+        }
+    </script>
+</body>
+
+</html>
